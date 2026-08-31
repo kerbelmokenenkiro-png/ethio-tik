@@ -128,8 +128,480 @@ init_db()
 @app.route('/')
 def home():
     return render_template_string('''
-    <style>body{font-family:Arial;text-align:center;padding:50px;background:linear-gradient(135deg,#078930,#FCDD09,#DA121A);color:#fff}.box{background:rgba(255,255,255,0.9);color:#000;padding:30px;border-radius:20px;max-width:400px;margin:auto}a{display:inline-block;margin:10px;padding:12px 25px;border-radius:30px;text-decoration:none;color:#fff;font-weight:bold}.g{background:#078930}.b{background:#1a73e8}.o{background:#f39c12}</style>
-    <div class=box><h1>🎬 ቲክ ሶሻል</h1><p>የኢትዮጵያውያን ቪዲዮ መድረክ!</p><a href=/register class=g>📝 ይመዝገቡ</a><a href=/login class=b>🔑 ይግቡ</a><a href=/feed class=o>🎬 ቪዲዮዎች</a></div>
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>🇪🇹 ኢትዮ ቲክ — ይግቡ / ይመዝገቡ</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Fraunces:ital,opsz,wght@0,9..144,500;0,9..144,600;1,9..144,500&family=Inter:wght@400;500;600&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --bg-1:#14131f;
+    --bg-2:#1c1a2c;
+    --card:#faf7f2;
+    --ink:#211f2e;
+    --muted:#726f82;
+    --line:#e4dfd4;
+    --amber:#e8a33d;
+    --amber-ink:#4a3410;
+    --teal:#4fb6a8;
+    --danger:#c9573f;
+    --radius-card:22px;
+    --ease:cubic-bezier(.65,0,.35,1);
+  }
+
+  *{box-sizing:border-box;}
+
+  body{
+    margin:0;
+    min-height:100vh;
+    display:flex;
+    align-items:center;
+    justify-content:center;
+    padding:48px 20px;
+    font-family:'Inter',sans-serif;
+    background:
+      radial-gradient(680px 420px at 18% 12%, rgba(232,163,61,.16), transparent 60%),
+      radial-gradient(600px 500px at 88% 82%, rgba(79,182,168,.14), transparent 60%),
+      linear-gradient(180deg, var(--bg-1), var(--bg-2));
+    color:var(--ink);
+  }
+
+  .stage{
+    width:100%;
+    max-width:400px;
+    perspective:1800px;
+  }
+
+  .brand{
+    text-align:center;
+    margin-bottom:22px;
+  }
+  .brand .mark{
+    display:inline-flex;
+    align-items:center;
+    gap:9px;
+    font-family:'Fraunces',serif;
+    font-weight:600;
+    font-size:22px;
+    color:#f4f1ea;
+    letter-spacing:.01em;
+  }
+  .brand .mark svg{width:22px;height:22px;flex:none;}
+  .brand p{
+    margin:6px 0 0;
+    font-size:13px;
+    color:#a7a2b8;
+  }
+
+  .card{
+    position:relative;
+    width:100%;
+    transform-style:preserve-3d;
+    transition:transform .7s var(--ease);
+    min-height:560px;
+  }
+  .card.flipped{ transform:rotateY(180deg); }
+
+  .face{
+    position:absolute;
+    inset:0;
+    backface-visibility:hidden;
+    background:var(--card);
+    border-radius:var(--radius-card);
+    box-shadow:0 30px 60px -20px rgba(0,0,0,.55), 0 2px 0 rgba(255,255,255,.04) inset;
+    overflow:hidden;
+    display:flex;
+    flex-direction:column;
+  }
+  .face.back{ transform:rotateY(180deg); }
+
+  .stub{
+    position:relative;
+    padding:22px 28px 20px;
+    display:flex;
+    align-items:center;
+    justify-content:space-between;
+    background:linear-gradient(120deg, #fff7ea, var(--card) 70%);
+  }
+  .stub .who{
+    display:flex;
+    align-items:center;
+    gap:10px;
+  }
+  .stub .avatar{
+    width:34px;height:34px;border-radius:50%;
+    background:var(--amber);
+    display:flex;align-items:center;justify-content:center;
+    flex:none;
+  }
+  .stub .avatar svg{width:17px;height:17px;stroke:var(--amber-ink);}
+  .stub .label-group{ line-height:1.25; }
+  .stub .eyebrow{ font-size:11px; color:var(--muted); }
+  .stub h1{
+    margin:0;
+    font-family:'Fraunces',serif;
+    font-weight:500;
+    font-size:19px;
+  }
+  .stub .seat{
+    text-align:right;
+    font-size:11px;
+    color:var(--muted);
+  }
+  .stub .seat b{
+    display:block;
+    font-family:'Fraunces',serif;
+    font-style:italic;
+    font-size:15px;
+    color:var(--ink);
+  }
+
+  .perf{
+    position:relative;
+    height:1px;
+    margin:0 0 2px;
+    border-top:1.5px dashed var(--line);
+  }
+  .perf::before, .perf::after{
+    content:"";
+    position:absolute;
+    top:-9px;
+    width:18px;height:18px;
+    border-radius:50%;
+    background:var(--bg-2);
+  }
+  .perf::before{ left:-9px; }
+  .perf::after{ right:-9px; }
+
+  .body{
+    padding:22px 28px 28px;
+    display:flex;
+    flex-direction:column;
+    gap:16px;
+    flex:1;
+  }
+
+  .subhead{
+    margin:0;
+    font-size:13.5px;
+    color:var(--muted);
+    line-height:1.5;
+  }
+
+  .field{
+    position:relative;
+  }
+  .field .icon{
+    position:absolute;
+    left:14px;
+    top:50%;
+    transform:translateY(-50%);
+    width:17px;height:17px;
+    stroke:var(--muted);
+    pointer-events:none;
+    transition:stroke .2s;
+  }
+  .field input{
+    width:100%;
+    padding:17px 14px 8px 42px;
+    font-family:'Inter',sans-serif;
+    font-size:14.5px;
+    color:var(--ink);
+    background:#fff;
+    border:1.5px solid var(--line);
+    border-radius:12px;
+    outline:none;
+    transition:border-color .18s, box-shadow .18s;
+  }
+  .field label{
+    position:absolute;
+    left:42px;
+    top:16px;
+    font-size:14.5px;
+    color:var(--muted);
+    pointer-events:none;
+    transform-origin:left center;
+    transition:transform .16s var(--ease), top .16s var(--ease), color .16s;
+  }
+  .field input:focus{
+    border-color:var(--teal);
+    box-shadow:0 0 0 4px rgba(79,182,168,.15);
+  }
+  .field input:focus ~ .icon{ stroke:var(--teal); }
+  .field input:focus + label,
+  .field input:not(:placeholder-shown) + label{
+    top:7px;
+    transform:scale(.78);
+    color:var(--teal);
+  }
+  .field input::placeholder{ color:transparent; }
+
+  .toggle-eye{
+    position:absolute;
+    right:12px;
+    top:50%;
+    transform:translateY(-50%);
+    width:30px;height:30px;
+    display:flex;align-items:center;justify-content:center;
+    background:none;border:none;cursor:pointer;
+    border-radius:8px;
+  }
+  .toggle-eye svg{ width:17px;height:17px;stroke:var(--muted); transition:stroke .18s; }
+  .toggle-eye:hover svg{ stroke:var(--ink); }
+  .toggle-eye:focus-visible{ outline:2px solid var(--teal); outline-offset:1px; }
+
+  .row-between{
+    display:flex;
+    align-items:center;
+    justify-content:space-between;
+    font-size:13px;
+    margin-top:-4px;
+  }
+  .remember{
+    display:flex;align-items:center;gap:7px;
+    color:var(--muted);
+    cursor:pointer;
+    user-select:none;
+  }
+  .remember input{ accent-color:var(--teal); width:14px;height:14px; }
+  .row-between a{ color:var(--teal); text-decoration:none; font-weight:500; }
+  .row-between a:hover{ text-decoration:underline; }
+
+  .submit{
+    position:relative;
+    margin-top:4px;
+    padding:14px 18px;
+    border:none;
+    border-radius:12px;
+    background:var(--ink);
+    color:#f4f1ea;
+    font-family:'Inter',sans-serif;
+    font-weight:600;
+    font-size:14.5px;
+    cursor:pointer;
+    display:flex;
+    align-items:center;
+    justify-content:center;
+    gap:8px;
+    overflow:hidden;
+    transition:transform .15s var(--ease), background .2s;
+  }
+  .submit:hover{ transform:translateY(-1px); background:#332f47; }
+  .submit:active{ transform:translateY(0); }
+  .submit:focus-visible{ outline:2px solid var(--amber); outline-offset:2px; }
+  .submit svg{ width:16px;height:16px; transition:transform .2s var(--ease); }
+  .submit:hover svg{ transform:translateX(3px); }
+
+  .submit .spinner{
+    width:16px;height:16px;
+    border:2px solid rgba(244,241,234,.35);
+    border-top-color:#f4f1ea;
+    border-radius:50%;
+    display:none;
+    animation:spin .7s linear infinite;
+  }
+  .submit.loading .btn-label,
+  .submit.loading svg.arrow{ opacity:0; }
+  .submit.loading .spinner{ display:block; position:absolute; }
+  @keyframes spin{ to{ transform:rotate(360deg); } }
+
+  .submit.success{ background:var(--teal); }
+  .submit .check{
+    display:none;
+    width:18px;height:18px;
+  }
+  .submit.success .check{ display:block; }
+  .submit.success .btn-label,
+  .submit.success svg.arrow,
+  .submit.success .spinner{ display:none; }
+
+  .divider{
+    display:flex;
+    align-items:center;
+    gap:10px;
+    color:var(--muted);
+    font-size:12px;
+    margin:2px 0;
+  }
+  .divider::before,.divider::after{
+    content:"";
+    flex:1;
+    height:1px;
+    background:var(--line);
+  }
+
+  .switch-line{
+    margin-top:auto;
+    padding-top:6px;
+    text-align:center;
+    font-size:13px;
+    color:var(--muted);
+  }
+  .switch-line a{
+    background:none;
+    border:none;
+    padding:0;
+    font-family:'Inter',sans-serif;
+    font-size:13px;
+    font-weight:600;
+    color:var(--amber);
+    cursor:pointer;
+    text-decoration:underline;
+    text-underline-offset:2px;
+  }
+
+  @media (prefers-reduced-motion: reduce){
+    .card{ transition:none; }
+    .submit, .submit svg, .field label, .field input{ transition:none; }
+  }
+
+  @media (max-width:420px){
+    .card{ min-height:600px; }
+  }
+</style>
+</head>
+<body>
+
+<div class="stage">
+  <div class="brand">
+    <span class="mark">
+      <svg viewBox="0 0 24 24" fill="none" stroke="#e8a33d" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><path d="M12 3v6l4 2"/><circle cx="12" cy="12" r="9"/></svg>
+      🇪🇹 ኢትዮ ቲክ
+    </span>
+    <p>የኢትዮጵያውያን ቪዲዮ መድረክ!</p>
+  </div>
+
+  <div class="card" id="card">
+
+    <!-- LOGIN FACE -->
+    <div class="face front">
+      <div class="stub">
+        <div class="who">
+          <span class="avatar">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M20 21a8 8 0 0 0-16 0"/><circle cx="12" cy="7" r="4"/></svg>
+          </span>
+          <span class="label-group">
+            <span class="eyebrow">እንኳን ደህና መጣህ</span>
+            <h1>ይግቡ</h1>
+          </span>
+        </div>
+        <span class="seat">Gate<b>02</b></span>
+      </div>
+      <div class="perf"></div>
+
+      <form class="body" action="/login" method="post">
+        <p class="subhead">ወደ ኢትዮ ቲክ ለመግባት መረጃህን አስገባ</p>
+
+        <div class="field">
+          <svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><path d="M4 6h16v12H4z"/><path d="m4 7 8 6 8-6"/></svg>
+          <input type="text" name="username" id="li-email" placeholder=" " required>
+          <label for="li-email">የተጠቃሚ ስም</label>
+        </div>
+
+        <div class="field">
+          <svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><rect x="5" y="11" width="14" height="9" rx="2"/><path d="M8 11V7a4 4 0 0 1 8 0v4"/></svg>
+          <input type="password" name="password" id="li-pass" placeholder=" " required style="padding-right:44px;">
+          <label for="li-pass">የይለፍ ቃል</label>
+          <button type="button" class="toggle-eye" data-target="li-pass" aria-label="Show password">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><path d="M1 12s4-7 11-7 11 7 11 7-4 7-11 7-11-7-11-7Z"/><circle cx="12" cy="12" r="3"/></svg>
+          </button>
+        </div>
+
+        <button type="submit" class="submit">
+          <span class="btn-label">🚀 ይግቡ</span>
+          <svg class="arrow" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12h14M13 6l6 6-6 6"/></svg>
+          <span class="spinner"></span>
+          <svg class="check" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M20 6 9 17l-5-5"/></svg>
+        </button>
+
+        <p class="switch-line">አዲስ ነህ? <a href="#" id="toSignup">አሁን ይመዝገቡ</a></p>
+      </form>
+    </div>
+
+    <!-- SIGNUP FACE -->
+    <div class="face back">
+      <div class="stub">
+        <div class="who">
+          <span class="avatar" style="background:var(--teal);">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M22 21v-2a4 4 0 0 0-3-3.87M16 3.13a4 4 0 0 1 0 7.75"/></svg>
+          </span>
+          <span class="label-group">
+            <span class="eyebrow">መጀመሪያ ጉብኝት</span>
+            <h1>ይመዝገቡ</h1>
+          </span>
+        </div>
+        <span class="seat">Gate<b>07</b></span>
+      </div>
+      <div class="perf"></div>
+
+      <form class="body" action="/register" method="post">
+        <p class="subhead">አዲስ አካውንት ለመፍጠር መረጃህን አስገባ</p>
+
+        <div class="field">
+          <svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><path d="M20 21a8 8 0 0 0-16 0"/><circle cx="12" cy="7" r="4"/></svg>
+          <input type="text" name="username" id="su-name" placeholder=" " required>
+          <label for="su-name">የተጠቃሚ ስም</label>
+        </div>
+
+        <div class="field">
+          <svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><rect x="5" y="11" width="14" height="9" rx="2"/><path d="M8 11V7a4 4 0 0 1 8 0v4"/></svg>
+          <input type="password" name="password" id="su-pass" placeholder=" " required style="padding-right:44px;">
+          <label for="su-pass">የይለፍ ቃል</label>
+          <button type="button" class="toggle-eye" data-target="su-pass" aria-label="Show password">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><path d="M1 12s4-7 11-7 11 7 11 7-4 7-11 7-11-7-11-7Z"/><circle cx="12" cy="12" r="3"/></svg>
+          </button>
+        </div>
+
+        <div class="field">
+          <svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><path d="M12 3v6l4 2"/><circle cx="12" cy="12" r="9"/></svg>
+          <input type="text" name="bio" id="su-bio" placeholder=" ">
+          <label for="su-bio">ስለራስህ ትንሽ (አማራጭ)</label>
+        </div>
+
+        <button type="submit" class="submit">
+          <span class="btn-label">📝 ይመዝገቡ</span>
+          <svg class="arrow" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12h14M13 6l6 6-6 6"/></svg>
+          <span class="spinner"></span>
+          <svg class="check" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M20 6 9 17l-5-5"/></svg>
+        </button>
+
+        <p class="switch-line">አባል ነህ? <a href="#" id="toLogin">ይግቡ</a></p>
+      </form>
+    </div>
+
+  </div>
+</div>
+
+<script>
+  const card = document.getElementById('card');
+  document.getElementById('toSignup').addEventListener('click', (e) => {
+    e.preventDefault();
+    card.classList.add('flipped');
+  });
+  document.getElementById('toLogin').addEventListener('click', (e) => {
+    e.preventDefault();
+    card.classList.remove('flipped');
+  });
+
+  document.querySelectorAll('.toggle-eye').forEach(btn => {
+    btn.addEventListener('click', () => {
+      const input = document.getElementById(btn.dataset.target);
+      const isPass = input.type === 'password';
+      input.type = isPass ? 'text' : 'password';
+      btn.querySelector('svg').innerHTML = isPass
+        ? '<path d="M17.9 17.9A10.6 10.6 0 0 1 12 19c-7 0-11-7-11-7a19.6 19.6 0 0 1 5-5.7M9.9 4.2A9.7 9.7 0 0 1 12 4c7 0 11 7 11 7a19.6 19.6 0 0 1-3 3.9M14.1 14.1a3 3 0 1 1-4.2-4.2"/><path d="M1 1l22 22"/>'
+        : '<path d="M1 12s4-7 11-7 11 7 11 7-4 7-11 7-11-7-11-7Z"/><circle cx="12" cy="12" r="3"/>';
+      btn.setAttribute('aria-label', isPass ? 'Hide password' : 'Show password');
+    });
+  });
+</script>
+
+</body>
+</html>
     ''')
 
 @app.route('/register', methods=['GET','POST'])
@@ -147,15 +619,7 @@ def register():
             return "✅ ተመዝግበሃል! <a href='/login'>ይግቡ</a>"
         except:
             return "❌ ስም ተይዟል!"
-    return '''
-    <form method=post style=text-align:center;padding:40px;>
-    <h2>📝 ይመዝገቡ</h2>
-    <input name=username placeholder=ስም required><br><br>
-    <input name=password type=password placeholder="የይለፍ ቃል" required><br><br>
-    <textarea name=bio placeholder="ስለራስህ ትንሽ..."></textarea><br><br>
-    <button type=submit>📝 ይመዝገቡ</button>
-    </form>
-    '''
+    return redirect('/')
 
 @app.route('/login', methods=['GET','POST'])
 def login():
@@ -171,19 +635,12 @@ def login():
             session['user_id'] = user[0]
             return redirect('/feed')
         return "❌ የተሳሳተ ስም ወይም የይለፍ ቃል"
-    return '''
-    <form method=post style=text-align:center;padding:40px;>
-    <h2>🔑 ይግቡ</h2>
-    <input name=username placeholder=ስም required><br><br>
-    <input name=password type=password placeholder="የይለፍ ቃል" required><br><br>
-    <button type=submit>🔑 ይግቡ</button>
-    </form>
-    '''
+    return redirect('/')
 
 @app.route('/feed', methods=['GET','POST'])
 def feed():
     if 'user_id' not in session:
-        return redirect('/login')
+        return redirect('/')
     
     conn = sqlite3.connect('social.db')
     c = conn.cursor()
@@ -237,7 +694,7 @@ def feed():
     <head>
         <meta charset="UTF-8">
         <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-        <title>🎬 ቲክ ሶሻል</title>
+        <title>🎬 ኢትዮ ቲክ</title>
         <style>
             * { margin: 0; padding: 0; box-sizing: border-box; }
             body { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif; background: #000; color: #fff; overflow: hidden; height: 100vh; touch-action: pan-y; }
@@ -246,23 +703,17 @@ def feed():
             .video-wrapper video { width: 100%; height: 100%; object-fit: cover; pointer-events: none; }
             .video-overlay { position: absolute; bottom: 0; left: 0; right: 0; padding: 80px 20px 30px; background: linear-gradient(to top, rgba(0,0,0,0.85) 0%, transparent 100%); pointer-events: none; }
             .video-overlay .username { font-size: 17px; font-weight: 600; pointer-events: auto; text-decoration: none; color: #fff; display: inline-flex; align-items: center; gap: 6px; }
-            .video-overlay .username:hover { text-decoration: underline; }
             .video-overlay .content { font-size: 15px; margin-top: 6px; pointer-events: auto; line-height: 1.4; max-width: 85%; }
             .video-overlay .hashtags { color: #4fc3f7; font-size: 14px; margin-top: 4px; pointer-events: auto; font-weight: 500; }
             .video-overlay .premium-badge { color: #ffd700; font-size: 11px; background: rgba(0,0,0,0.6); padding: 2px 10px; border-radius: 12px; display: inline-block; margin-top: 6px; border: 1px solid rgba(255,215,0,0.3); }
-            .video-overlay .verified-badge { color: #4fc3f7; font-size: 16px; }
             .video-actions { position: absolute; right: 16px; bottom: 120px; display: flex; flex-direction: column; gap: 18px; align-items: center; pointer-events: auto; z-index: 10; }
             .video-actions a { color: #fff; text-decoration: none; font-size: 26px; display: flex; flex-direction: column; align-items: center; gap: 2px; transition: all 0.15s ease; cursor: pointer; filter: drop-shadow(0 2px 4px rgba(0,0,0,0.5)); -webkit-tap-highlight-color: transparent; touch-action: manipulation; }
             .video-actions a:hover { transform: scale(1.1); }
             .video-actions a:active { transform: scale(0.9); }
             .video-actions .count { font-size: 12px; font-weight: 600; letter-spacing: 0.3px; }
             .like-btn.liked { color: #ff2d55; }
-            .like-btn.liked .count { color: #ff2d55; }
             .favorite-btn.favorited { color: #ffd700; }
-            .favorite-btn.favorited .count { color: #ffd700; }
             .video-actions .profile-icon { width: 48px; height: 48px; border-radius: 50%; background: linear-gradient(135deg, #e74c3c, #f39c12); display: flex; align-items: center; justify-content: center; font-size: 20px; border: 2.5px solid #fff; overflow: hidden; box-shadow: 0 4px 12px rgba(0,0,0,0.6); transition: transform 0.2s; touch-action: manipulation; }
-            .video-actions .profile-icon:hover { transform: scale(1.05); }
-            .video-actions .profile-icon img { width: 100%; height: 100%; object-fit: cover; }
             .upload-btn { position: fixed; bottom: 90px; left: 50%; transform: translateX(-50%); background: linear-gradient(135deg, #fff, #f0f0f0); color: #000; padding: 12px 28px; border-radius: 30px; text-decoration: none; font-weight: 700; font-size: 14px; z-index: 20; box-shadow: 0 4px 20px rgba(0,0,0,0.6); pointer-events: auto; letter-spacing: 0.5px; transition: all 0.2s; touch-action: manipulation; }
             .upload-btn:hover { background: #fff; transform: translateX(-50%) scale(1.03); }
             .upload-btn:active { transform: translateX(-50%) scale(0.95); }
@@ -270,7 +721,6 @@ def feed():
             .bottom-nav { position: fixed; bottom: 0; left: 0; right: 0; background: rgba(0,0,0,0.85); backdrop-filter: blur(16px); -webkit-backdrop-filter: blur(16px); display: flex; justify-content: space-around; padding: 8px 0 14px; border-top: 0.5px solid rgba(255,255,255,0.06); max-width: 600px; margin: auto; z-index: 30; pointer-events: auto; }
             .bottom-nav a { color: #888; text-decoration: none; font-size: 22px; display: flex; flex-direction: column; align-items: center; gap: 1px; transition: color 0.2s; padding: 4px 12px; border-radius: 8px; touch-action: manipulation; -webkit-tap-highlight-color: transparent; }
             .bottom-nav a.active { color: #fff; }
-            .bottom-nav a:hover { color: #fff; }
             .bottom-nav .label { font-size: 10px; font-weight: 500; letter-spacing: 0.3px; }
             .top-bar { position: fixed; top: 0; left: 0; right: 0; padding: 12px 20px; background: rgba(0,0,0,0.5); backdrop-filter: blur(12px); -webkit-backdrop-filter: blur(12px); display: flex; justify-content: space-between; align-items: center; z-index: 20; max-width: 600px; margin: auto; pointer-events: auto; }
             .top-bar .logo { font-size: 18px; font-weight: 700; color: #fff; letter-spacing: -0.5px; background: linear-gradient(135deg, #ff2d55, #ff6b35); -webkit-background-clip: text; -webkit-text-fill-color: transparent; }
@@ -287,11 +737,15 @@ def feed():
             .ad-banner a { color: #fff; text-decoration: none; display: flex; align-items: center; justify-content: center; gap: 8px; }
             .like-burst { position: absolute; color: #ff2d55; font-size: 40px; font-weight: 700; pointer-events: none; animation: floatUp 0.8s ease-out forwards; z-index: 50; }
             @keyframes floatUp { 0% { opacity: 1; transform: translateY(0) scale(0.5); } 100% { opacity: 0; transform: translateY(-80px) scale(1.2); } }
+            .ad-container { padding: 20px; background: linear-gradient(135deg, #1a1a2e, #16213e); border-radius: 16px; margin: 10px 0; text-align: center; }
+            .ad-container p { color: #888; font-size: 12px; margin-bottom: 10px; }
+            .ad-container .ad-box { background: #222; padding: 20px; border-radius: 12px; color: #fff; min-height: 60px; display: flex; align-items: center; justify-content: center; flex-direction: column; }
+            .ad-container .ad-box small { color: #666; font-size: 12px; margin-top: 5px; }
         </style>
     </head>
     <body>
         <div class="top-bar">
-            <span class="logo">🎬 ቲክ ሶሻል</span>
+            <span class="logo">🇪🇹 ኢትዮ ቲክ</span>
             <div class="search-bar">
                 <form method="get" action="/feed" style="display:flex;gap:6px;align-items:center;">
                     <input type="text" name="tag" placeholder="#ሃሽታግ">
@@ -311,6 +765,7 @@ def feed():
     '''
     
     if posts:
+        ad_counter = 0
         for p in posts:
             pid, un, cont, vid, ts, likes, favs, reposts, uid, ppic, hashtags, is_premium_only, is_verified, liked, favorited, reposted = p
             ts_str = ts[:16] if ts else 'አሁን'
@@ -356,6 +811,27 @@ def feed():
                 </div>
             </div>
             '''
+            
+            ad_counter += 1
+            if ad_counter % 2 == 0:
+                html += '''
+                <div class="ad-container">
+                    <p>📢 ማስታወቂያ</p>
+                    <div class="ad-box">
+                        <script async src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-4887247545071855" crossorigin="anonymous"></script>
+                        <ins class="adsbygoogle"
+                             style="display:block"
+                             data-ad-client="ca-pub-4887247545071855"
+                             data-ad-slot="6640524950"
+                             data-ad-format="auto"
+                             data-full-width-responsive="true"></ins>
+                        <script>
+                             (adsbygoogle = window.adsbygoogle || []).push({});
+                        </script>
+                        <small>ፕሪሚየም ተጠቃሚዎች ማስታወቂያ አያዩም</small>
+                    </div>
+                </div>
+                '''
     else:
         html += '<div class="no-videos">🎬 ምንም ቪዲዮ የለም!<br>የመጀመሪያውን ቪዲዮ ስቀል!</div>'
     
@@ -370,7 +846,6 @@ def feed():
             <a href="/profile/''' + str(session['user_id']) + '''">👤<span class="label">ፕሮፋይል</span></a>
         </div>
         <script>
-            // ቪዲዮ አጫዋች
             var videos = document.querySelectorAll('.video-wrapper video');
             var observer = new IntersectionObserver(function(entries) {
                 entries.forEach(function(entry) {
@@ -385,7 +860,6 @@ def feed():
             }, { threshold: 0.5 });
             videos.forEach(function(video) { observer.observe(video); });
             
-            // ላይክ
             function toggleLike(postId) {
                 fetch('/like_ajax/' + postId).then(function(r) { return r.json(); }).then(function(data) {
                     var icon = document.getElementById('like-icon-' + postId);
@@ -407,7 +881,6 @@ def feed():
                 });
             }
             
-            // ፌቨራይት
             function toggleFavorite(postId) {
                 fetch('/favorite_ajax/' + postId).then(function(r) { return r.json(); }).then(function(data) {
                     document.getElementById('fav-icon-' + postId).textContent = data.favorited ? '⭐' : '☆';
@@ -415,7 +888,6 @@ def feed():
                 });
             }
             
-            // ሪፖስት
             function toggleRepost(postId) {
                 fetch('/repost_ajax/' + postId).then(function(r) { return r.json(); }).then(function(data) {
                     document.getElementById('repost-icon-' + postId).textContent = data.reposted ? '🔄' : '🔁';
@@ -423,184 +895,22 @@ def feed():
                 });
             }
             
-            // ሼር
             function sharePost(postId, username) {
                 var url = window.location.origin + '/feed?post=' + postId;
                 if (navigator.share) {
-                    navigator.share({ title: username, text: '🎬 ቲክ ሶሻል ቪዲዮ!', url: url });
+                    navigator.share({ title: username, text: '🎬 ኢትዮ ቲክ ቪዲዮ!', url: url });
                 } else {
                     navigator.clipboard.writeText(url);
                     alert('✅ ሊንክ ተቀድቷል!');
                 }
             }
             
-            // ሊንክ ቅዳ
             function copyLink(postId) {
                 var url = window.location.origin + '/feed?post=' + postId;
                 navigator.clipboard.writeText(url);
                 alert('✅ ሊንክ ተቀድቷል: ' + url);
             }
         </script>
-    </body>
-    </html>
-    '''
-    return html
-
-# ============ የቀሩት ተግባራት ============
-
-@app.route('/premium')
-def premium():
-    if 'user_id' not in session:
-        return redirect('/login')
-    
-    conn = sqlite3.connect('social.db')
-    c = conn.cursor()
-    c.execute("SELECT username, is_premium, is_verified, coins FROM users WHERE id=?", (session['user_id'],))
-    user = c.fetchone()
-    conn.close()
-    
-    html = f'''
-    <!DOCTYPE html>
-    <html>
-    <head><meta charset="UTF-8"><meta name="viewport" content="width=device-width, initial-scale=1.0"><title>👑 ፕሪሚየም</title>
-    <style>*{{margin:0;padding:0;box-sizing:border-box}}body{{font-family:-apple-system,Arial,sans-serif;background:#000;color:#fff}}.container{{max-width:600px;margin:auto;background:#0a0a0a;min-height:100vh}}.top-bar{{padding:16px 20px;display:flex;justify-content:space-between;align-items:center;border-bottom:1px solid #222}}.top-bar a{{color:#fff;text-decoration:none;font-size:24px}}.top-bar .title{{font-size:18px;font-weight:bold}}.card{{background:#1a1a1a;margin:16px;padding:20px;border-radius:16px;text-align:center}}.card .price{{font-size:32px;font-weight:bold;color:#ffd700}}.card .desc{{color:#888;margin:10px 0}}.btn{{background:#ffd700;color:#000;border:none;padding:12px 30px;border-radius:25px;font-size:16px;font-weight:bold;cursor:pointer;text-decoration:none;display:inline-block}}.btn:hover{{background:#f0c000}}.btn-blue{{background:#1a73e8;color:#fff}}.btn-blue:hover{{background:#1557b0}}.features{{text-align:left;padding:0 20px;list-style:none}}.features li{{padding:8px 0;border-bottom:1px solid #1a1a1a}}.features li:before{{content:"✅ ";color:#ffd700}}.bottom-nav{{position:fixed;bottom:0;left:0;right:0;background:#0a0a0a;display:flex;justify-content:space-around;padding:10px 0;border-top:1px solid #222;max-width:600px;margin:auto}}.bottom-nav a{{color:#888;text-decoration:none;font-size:22px;display:flex;flex-direction:column;align-items:center;gap:2px}}.bottom-nav a.active{{color:#1a73e8}}.bottom-nav .label{{font-size:10px}}
-    </style>
-    </head>
-    <body>
-        <div class=container>
-            <div class=top-bar><a href=/feed>‹</a><span class=title>👑 ፕሪሚየም</span><span></span></div>
-            <div class=card><div class=price>👑 {user[0]}</div>
-            <div class=desc>{"✅ ፕሪሚየም አባል" if user[1] else "❌ መደበኛ ተጠቃሚ"}</div>
-            <div class=desc>{"✅ የተረጋገጠ" if user[2] else "❌ ያልተረጋገጠ"}</div>
-            <div class=desc>🪙 {user[3]} ሳንቲም</div>
-            </div>
-            <div class=card><div class=price>👑 ፕሪሚየም ይሁኑ</div>
-            <div class=desc>በወር 50 ብር ብቻ!</div>
-            <ul class=features>
-                <li>ማስታወቂያ የለም</li>
-                <li>ፕሪሚየም ቪዲዮዎችን ማየት</li>
-                <li>የተረጋገጠ ምልክት ✅</li>
-                <li>ልዩ ስቲከሮች</li>
-                <li>ቅድሚያ ድጋፍ</li>
-            </ul>
-            <br>
-            <a href="/upgrade_premium" class="btn">👑 አሁን ይመዝገቡ</a>
-            </div>
-            <div class=card><div class=price>🪙 ሳንቲም</div>
-            <div class=desc>ለሌሎች ልገሳ ለመስጠት ሳንቲም ያግኙ!</div>
-            <br>
-            <a href="/buy_coins" class="btn btn-blue">🪙 ሳንቲም ግዙ</a>
-            </div>
-        </div>
-        <div class=bottom-nav>
-            <a href=/feed>🏠<span class=label>መነሻ</span></a>
-            <a href=/search>🔍<span class=label>ፈልግ</span></a>
-            <a href=/chat>💬<span class=label>ውይይት</span></a>
-            <a href=/premium class=active>👑<span class=label>ፕሪሚየም</span></a>
-            <a href=/profile/{session['user_id']}>👤<span class=label>ፕሮፋይል</span></a>
-        </div>
-    </body>
-    </html>
-    '''
-    return html
-
-@app.route('/upgrade_premium')
-def upgrade_premium():
-    if 'user_id' not in session:
-        return redirect('/login')
-    conn = sqlite3.connect('social.db')
-    c = conn.cursor()
-    c.execute("UPDATE users SET is_premium=1, is_verified=1, coins=coins+500 WHERE id=?", (session['user_id'],))
-    conn.commit()
-    conn.close()
-    return redirect('/premium')
-
-@app.route('/buy_coins', methods=['GET', 'POST'])
-def buy_coins():
-    if 'user_id' not in session:
-        return redirect('/login')
-    if request.method == 'POST':
-        amount = int(request.form.get('amount', 100))
-        conn = sqlite3.connect('social.db')
-        c = conn.cursor()
-        c.execute("UPDATE users SET coins=coins+? WHERE id=?", (amount, session['user_id']))
-        conn.commit()
-        conn.close()
-        return redirect('/premium')
-    
-    html = f'''
-    <!DOCTYPE html>
-    <html>
-    <head><meta charset="UTF-8"><meta name="viewport" content="width=device-width, initial-scale=1.0"><title>🪙 ሳንቲም ግዙ</title>
-    <style>*{{margin:0;padding:0;box-sizing:border-box}}body{{font-family:Arial;background:#000;color:#fff;display:flex;align-items:center;justify-content:center;min-height:100vh}}.container{{background:#1a1a1a;padding:40px;border-radius:20px;max-width:400px;width:100%;text-align:center}}button{{background:#ffd700;color:#000;border:none;padding:12px 30px;border-radius:25px;font-size:16px;font-weight:bold;cursor:pointer;width:100%;margin:10px 0}}button:hover{{background:#f0c000}}select{{width:100%;padding:12px;border-radius:12px;border:1px solid #333;background:#222;color:#fff;font-size:16px;margin:10px 0}}a{{color:#1a73e8;text-decoration:none}}
-    </style>
-    </head>
-    <body>
-        <div class=container><h2>🪙 ሳንቲም ግዙ</h2>
-        <form method=post>
-        <select name=amount>
-            <option value=100>100 ሳንቲም - 10 ብር</option>
-            <option value=500>500 ሳንቲም - 40 ብር</option>
-            <option value=1000>1000 ሳንቲም - 70 ብር</option>
-            <option value=5000>5000 ሳንቲም - 300 ብር</option>
-        </select>
-        <button type=submit>🪙 ግዙ</button>
-        </form><br><a href=/premium>⬅️ ወደ ፕሪሚየም</a></div>
-    </body>
-    </html>
-    '''
-    return html
-
-@app.route('/donate/<int:user_id>', methods=['GET', 'POST'])
-def donate(user_id):
-    if 'user_id' not in session:
-        return redirect('/login')
-    if user_id == session['user_id']:
-        return redirect('/feed')
-    
-    if request.method == 'POST':
-        amount = int(request.form.get('amount', 10))
-        message = request.form.get('message', '').strip()
-        conn = sqlite3.connect('social.db')
-        c = conn.cursor()
-        c.execute("SELECT coins FROM users WHERE id=?", (session['user_id'],))
-        sender_coins = c.fetchone()[0]
-        if sender_coins < amount:
-            conn.close()
-            return "❌ በቂ ሳንቲም የለህም!"
-        c.execute("UPDATE users SET coins=coins-? WHERE id=?", (amount, session['user_id']))
-        c.execute("UPDATE users SET coins=coins+? WHERE id=?", (amount, user_id))
-        c.execute("INSERT INTO donations (sender_id, receiver_id, amount, message, timestamp) VALUES (?,?,?,?,?)",
-                  (session['user_id'], user_id, amount, message, datetime.now()))
-        c.execute("INSERT INTO notifications (user_id, type, from_user_id, timestamp) VALUES (?, ?, ?, ?)",
-                  (user_id, 'donation', session['user_id'], datetime.now()))
-        conn.commit()
-        conn.close()
-        return redirect('/profile/' + str(user_id))
-    
-    conn = sqlite3.connect('social.db')
-    c = conn.cursor()
-    c.execute("SELECT username, coins FROM users WHERE id=?", (user_id,))
-    receiver = c.fetchone()
-    c.execute("SELECT coins FROM users WHERE id=?", (session['user_id'],))
-    sender_coins = c.fetchone()[0]
-    conn.close()
-    
-    html = f'''
-    <!DOCTYPE html>
-    <html>
-    <head><meta charset="UTF-8"><meta name="viewport" content="width=device-width, initial-scale=1.0"><title>🎁 ልገሳ</title>
-    <style>*{{margin:0;padding:0;box-sizing:border-box}}body{{font-family:Arial;background:#000;color:#fff;display:flex;align-items:center;justify-content:center;min-height:100vh}}.container{{background:#1a1a1a;padding:40px;border-radius:20px;max-width:400px;width:100%;text-align:center}}input,textarea{{width:100%;padding:12px;border-radius:12px;border:1px solid #333;background:#222;color:#fff;margin:10px 0}}button{{background:#ffd700;color:#000;border:none;padding:12px 30px;border-radius:25px;font-size:16px;font-weight:bold;cursor:pointer;width:100%}}button:hover{{background:#f0c000}}a{{color:#1a73e8;text-decoration:none}}
-    </style>
-    </head>
-    <body>
-        <div class=container><h2>🎁 ለ {receiver[0]} ልገሳ</h2>
-        <p>🪙 ሳንቲምህ: {sender_coins}</p>
-        <form method=post>
-        <input type=number name=amount placeholder="ሳንቲም ብዛት" min=1 max={sender_coins} required>
-        <textarea name=message placeholder="መልዕክት..."></textarea>
-        <button type=submit>🎁 ለግስ</button>
-        </form><br><a href=/feed>⬅️ ወደ ቪዲዮዎች</a></div>
     </body>
     </html>
     '''
@@ -675,7 +985,7 @@ def repost_ajax(post_id):
 @app.route('/delete/<int:post_id>')
 def delete_post(post_id):
     if 'user_id' not in session:
-        return redirect('/login')
+        return redirect('/')
     conn = sqlite3.connect('social.db')
     c = conn.cursor()
     c.execute("SELECT user_id, video FROM posts WHERE id=?", (post_id,))
@@ -695,7 +1005,7 @@ def delete_post(post_id):
 @app.route('/upload', methods=['GET', 'POST'])
 def upload():
     if 'user_id' not in session:
-        return redirect('/login')
+        return redirect('/')
     if request.method == 'POST':
         content = request.form.get('content', '').strip()
         video = request.files.get('video')
@@ -736,7 +1046,7 @@ def upload():
 @app.route('/profile/<int:user_id>')
 def profile(user_id):
     if 'user_id' not in session:
-        return redirect('/login')
+        return redirect('/')
     conn = sqlite3.connect('social.db')
     c = conn.cursor()
     c.execute("SELECT id, username, bio, profile_pic, created_at, is_premium, is_verified, coins FROM users WHERE id=?", (user_id,))
@@ -812,7 +1122,7 @@ def profile(user_id):
 @app.route('/upload_profile_pic', methods=['GET', 'POST'])
 def upload_profile_pic():
     if 'user_id' not in session:
-        return redirect('/login')
+        return redirect('/')
     if request.method == 'POST':
         if 'profile_pic' not in request.files:
             return redirect('/profile/' + str(session['user_id']))
@@ -845,7 +1155,7 @@ def upload_profile_pic():
 @app.route('/like/<int:post_id>')
 def like_post(post_id):
     if 'user_id' not in session:
-        return redirect('/login')
+        return redirect('/')
     conn = sqlite3.connect('social.db')
     c = conn.cursor()
     c.execute("SELECT * FROM likes WHERE user_id=? AND post_id=?", (session['user_id'], post_id))
@@ -863,7 +1173,7 @@ def like_post(post_id):
 @app.route('/comment/<int:post_id>', methods=['GET','POST'])
 def comment(post_id):
     if 'user_id' not in session:
-        return redirect('/login')
+        return redirect('/')
     if request.method == 'POST':
         content = request.form.get('content','').strip()
         if content:
@@ -913,7 +1223,7 @@ def follow(user_id):
 @app.route('/chat')
 def chat():
     if 'user_id' not in session:
-        return redirect('/login')
+        return redirect('/')
     conn = sqlite3.connect('social.db')
     c = conn.cursor()
     c.execute("SELECT id, username, profile_pic FROM users WHERE id != ?", (session['user_id'],))
@@ -956,7 +1266,7 @@ def chat():
 @app.route('/chat/<int:receiver_id>', methods=['GET', 'POST'])
 def chat_user(receiver_id):
     if 'user_id' not in session:
-        return redirect('/login')
+        return redirect('/')
     conn = sqlite3.connect('social.db')
     c = conn.cursor()
     if request.method == 'POST':
@@ -1019,7 +1329,7 @@ def chat_user(receiver_id):
 @app.route('/notifications')
 def notifications():
     if 'user_id' not in session:
-        return redirect('/login')
+        return redirect('/')
     conn = sqlite3.connect('social.db')
     c = conn.cursor()
     c.execute('''SELECT n.id, n.type, n.from_user_id, n.post_id, n.timestamp, u.username, u.profile_pic, n.is_read
@@ -1071,7 +1381,7 @@ def notifications():
 @app.route('/search', methods=['GET','POST'])
 def search():
     if 'user_id' not in session:
-        return redirect('/login')
+        return redirect('/')
     results = []
     if request.method == 'POST':
         query = request.form.get('query','').strip()
@@ -1099,6 +1409,164 @@ def search():
         <a href="/premium">👑<span class="label">ፕሪሚየም</span></a>
         <a href="/profile/{session['user_id']}">👤<span class="label">ፕሮፋይል</span></a>
     </div>
+    '''
+    return html
+
+@app.route('/premium')
+def premium():
+    if 'user_id' not in session:
+        return redirect('/')
+    
+    conn = sqlite3.connect('social.db')
+    c = conn.cursor()
+    c.execute("SELECT username, is_premium, is_verified, coins FROM users WHERE id=?", (session['user_id'],))
+    user = c.fetchone()
+    conn.close()
+    
+    html = f'''
+    <!DOCTYPE html>
+    <html>
+    <head><meta charset="UTF-8"><meta name="viewport" content="width=device-width, initial-scale=1.0"><title>👑 ፕሪሚየም</title>
+    <style>*{{margin:0;padding:0;box-sizing:border-box}}body{{font-family:-apple-system,Arial,sans-serif;background:#000;color:#fff}}.container{{max-width:600px;margin:auto;background:#0a0a0a;min-height:100vh}}.top-bar{{padding:16px 20px;display:flex;justify-content:space-between;align-items:center;border-bottom:1px solid #222}}.top-bar a{{color:#fff;text-decoration:none;font-size:24px}}.top-bar .title{{font-size:18px;font-weight:bold}}.card{{background:#1a1a1a;margin:16px;padding:20px;border-radius:16px;text-align:center}}.card .price{{font-size:32px;font-weight:bold;color:#ffd700}}.card .desc{{color:#888;margin:10px 0}}.btn{{background:#ffd700;color:#000;border:none;padding:12px 30px;border-radius:25px;font-size:16px;font-weight:bold;cursor:pointer;text-decoration:none;display:inline-block}}.btn:hover{{background:#f0c000}}.btn-blue{{background:#1a73e8;color:#fff}}.btn-blue:hover{{background:#1557b0}}.features{{text-align:left;padding:0 20px;list-style:none}}.features li{{padding:8px 0;border-bottom:1px solid #1a1a1a}}.features li:before{{content:"✅ ";color:#ffd700}}.bottom-nav{{position:fixed;bottom:0;left:0;right:0;background:#0a0a0a;display:flex;justify-content:space-around;padding:10px 0;border-top:1px solid #222;max-width:600px;margin:auto}}.bottom-nav a{{color:#888;text-decoration:none;font-size:22px;display:flex;flex-direction:column;align-items:center;gap:2px}}.bottom-nav a.active{{color:#1a73e8}}.bottom-nav .label{{font-size:10px}}
+    </style>
+    </head>
+    <body>
+        <div class=container>
+            <div class=top-bar><a href=/feed>‹</a><span class=title>👑 ፕሪሚየም</span><span></span></div>
+            <div class=card><div class=price>👑 {user[0]}</div>
+            <div class=desc>{"✅ ፕሪሚየም አባል" if user[1] else "❌ መደበኛ ተጠቃሚ"}</div>
+            <div class=desc>{"✅ የተረጋገጠ" if user[2] else "❌ ያልተረጋገጠ"}</div>
+            <div class=desc>🪙 {user[3]} ሳንቲም</div>
+            </div>
+            <div class=card><div class=price>👑 ፕሪሚየም ይሁኑ</div>
+            <div class=desc>በወር 50 ብር ብቻ!</div>
+            <ul class=features>
+                <li>ማስታወቂያ የለም</li>
+                <li>ፕሪሚየም ቪዲዮዎችን ማየት</li>
+                <li>የተረጋገጠ ምልክት ✅</li>
+                <li>ልዩ ስቲከሮች</li>
+                <li>ቅድሚያ ድጋፍ</li>
+            </ul>
+            <br>
+            <a href="/upgrade_premium" class="btn">👑 አሁን ይመዝገቡ</a>
+            </div>
+            <div class=card><div class=price>🪙 ሳንቲም</div>
+            <div class=desc>ለሌሎች ልገሳ ለመስጠት ሳንቲም ያግኙ!</div>
+            <br>
+            <a href="/buy_coins" class="btn btn-blue">🪙 ሳንቲም ግዙ</a>
+            </div>
+        </div>
+        <div class=bottom-nav>
+            <a href=/feed>🏠<span class=label>መነሻ</span></a>
+            <a href=/search>🔍<span class=label>ፈልግ</span></a>
+            <a href=/chat>💬<span class=label>ውይይት</span></a>
+            <a href=/premium class=active>👑<span class=label>ፕሪሚየም</span></a>
+            <a href=/profile/{session['user_id']}>👤<span class=label>ፕሮፋይል</span></a>
+        </div>
+    </body>
+    </html>
+    '''
+    return html
+
+@app.route('/upgrade_premium')
+def upgrade_premium():
+    if 'user_id' not in session:
+        return redirect('/')
+    conn = sqlite3.connect('social.db')
+    c = conn.cursor()
+    c.execute("UPDATE users SET is_premium=1, is_verified=1, coins=coins+500 WHERE id=?", (session['user_id'],))
+    conn.commit()
+    conn.close()
+    return redirect('/premium')
+
+@app.route('/buy_coins', methods=['GET', 'POST'])
+def buy_coins():
+    if 'user_id' not in session:
+        return redirect('/')
+    if request.method == 'POST':
+        amount = int(request.form.get('amount', 100))
+        conn = sqlite3.connect('social.db')
+        c = conn.cursor()
+        c.execute("UPDATE users SET coins=coins+? WHERE id=?", (amount, session['user_id']))
+        conn.commit()
+        conn.close()
+        return redirect('/premium')
+    
+    html = f'''
+    <!DOCTYPE html>
+    <html>
+    <head><meta charset="UTF-8"><meta name="viewport" content="width=device-width, initial-scale=1.0"><title>🪙 ሳንቲም ግዙ</title>
+    <style>*{{margin:0;padding:0;box-sizing:border-box}}body{{font-family:Arial;background:#000;color:#fff;display:flex;align-items:center;justify-content:center;min-height:100vh}}.container{{background:#1a1a1a;padding:40px;border-radius:20px;max-width:400px;width:100%;text-align:center}}button{{background:#ffd700;color:#000;border:none;padding:12px 30px;border-radius:25px;font-size:16px;font-weight:bold;cursor:pointer;width:100%;margin:10px 0}}button:hover{{background:#f0c000}}select{{width:100%;padding:12px;border-radius:12px;border:1px solid #333;background:#222;color:#fff;font-size:16px;margin:10px 0}}a{{color:#1a73e8;text-decoration:none}}
+    </style>
+    </head>
+    <body>
+        <div class=container><h2>🪙 ሳንቲም ግዙ</h2>
+        <form method=post>
+        <select name=amount>
+            <option value=100>100 ሳንቲም - 10 ብር</option>
+            <option value=500>500 ሳንቲም - 40 ብር</option>
+            <option value=1000>1000 ሳንቲም - 70 ብር</option>
+            <option value=5000>5000 ሳንቲም - 300 ብር</option>
+        </select>
+        <button type=submit>🪙 ግዙ</button>
+        </form><br><a href=/premium>⬅️ ወደ ፕሪሚየም</a></div>
+    </body>
+    </html>
+    '''
+    return html
+
+@app.route('/donate/<int:user_id>', methods=['GET', 'POST'])
+def donate(user_id):
+    if 'user_id' not in session:
+        return redirect('/')
+    if user_id == session['user_id']:
+        return redirect('/feed')
+    
+    if request.method == 'POST':
+        amount = int(request.form.get('amount', 10))
+        message = request.form.get('message', '').strip()
+        conn = sqlite3.connect('social.db')
+        c = conn.cursor()
+        c.execute("SELECT coins FROM users WHERE id=?", (session['user_id'],))
+        sender_coins = c.fetchone()[0]
+        if sender_coins < amount:
+            conn.close()
+            return "❌ በቂ ሳንቲም የለህም!"
+        c.execute("UPDATE users SET coins=coins-? WHERE id=?", (amount, session['user_id']))
+        c.execute("UPDATE users SET coins=coins+? WHERE id=?", (amount, user_id))
+        c.execute("INSERT INTO donations (sender_id, receiver_id, amount, message, timestamp) VALUES (?,?,?,?,?)",
+                  (session['user_id'], user_id, amount, message, datetime.now()))
+        c.execute("INSERT INTO notifications (user_id, type, from_user_id, timestamp) VALUES (?, ?, ?, ?)",
+                  (user_id, 'donation', session['user_id'], datetime.now()))
+        conn.commit()
+        conn.close()
+        return redirect('/profile/' + str(user_id))
+    
+    conn = sqlite3.connect('social.db')
+    c = conn.cursor()
+    c.execute("SELECT username, coins FROM users WHERE id=?", (user_id,))
+    receiver = c.fetchone()
+    c.execute("SELECT coins FROM users WHERE id=?", (session['user_id'],))
+    sender_coins = c.fetchone()[0]
+    conn.close()
+    
+    html = f'''
+    <!DOCTYPE html>
+    <html>
+    <head><meta charset="UTF-8"><meta name="viewport" content="width=device-width, initial-scale=1.0"><title>🎁 ልገሳ</title>
+    <style>*{{margin:0;padding:0;box-sizing:border-box}}body{{font-family:Arial;background:#000;color:#fff;display:flex;align-items:center;justify-content:center;min-height:100vh}}.container{{background:#1a1a1a;padding:40px;border-radius:20px;max-width:400px;width:100%;text-align:center}}input,textarea{{width:100%;padding:12px;border-radius:12px;border:1px solid #333;background:#222;color:#fff;margin:10px 0}}button{{background:#ffd700;color:#000;border:none;padding:12px 30px;border-radius:25px;font-size:16px;font-weight:bold;cursor:pointer;width:100%}}button:hover{{background:#f0c000}}a{{color:#1a73e8;text-decoration:none}}
+    </style>
+    </head>
+    <body>
+        <div class=container><h2>🎁 ለ {receiver[0]} ልገሳ</h2>
+        <p>🪙 ሳንቲምህ: {sender_coins}</p>
+        <form method=post>
+        <input type=number name=amount placeholder="ሳንቲም ብዛት" min=1 max={sender_coins} required>
+        <textarea name=message placeholder="መልዕክት..."></textarea>
+        <button type=submit>🎁 ለግስ</button>
+        </form><br><a href=/feed>⬅️ ወደ ቪዲዮዎች</a></div>
+    </body>
+    </html>
     '''
     return html
 
